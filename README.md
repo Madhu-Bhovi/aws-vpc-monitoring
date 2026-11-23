@@ -58,11 +58,27 @@ Command outputs are in [docs/test_output.txt](https://www.google.com/search?q=do
 
 **Network**
 
+[docs/vpc.png]
+[docs/Public_subnet.png]
+[docs/private_subnet.png]
+[docs/Public_route_table.png]
+[docs/Private_route_table.png]
+[docs/Internet_gateway.png]
+
 **Security groups**
+
+[docs/Web_security_group.png]
+[docs/Private_security_group.png]
 
 **Servers and app**
 
+[docs/Running%20_instances.png]
+[docs/To-do-app.png]
+
 **Monitoring**
+
+[docs/Cloudwatch_metrics.png]
+[docs/SNS_alarm_email.png]
 
 ## Problems I ran into
 
