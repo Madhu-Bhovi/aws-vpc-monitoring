@@ -1,0 +1,76 @@
+Test output for the VPC and monitoring project
+===============================================
+
+Test 1: SSH from my laptop to the private server's private address
+-------------------------------------------------------------------
+Command (laptop):
+  ssh -o ConnectTimeout=8 -i ~/.ssh/project2-key.pem ubuntu@10.0.2.169
+
+Output:
+  ssh: connect to host 10.0.2.169 port 22: Connection timed out
+
+Meaning: connection timed out as expected (private address, no public IP, no route from the internet).
+
+
+Test 2: SSH to the private server through the web server
+--------------------------------------------------------
+Command (laptop), after fixing ~/.ssh/config:
+  ssh project2-private
+
+Output:
+  Welcome to Ubuntu 24.04.5 LTS (GNU/Linux 7.0.0-1018-aws x86_64)
+  ...
+  System information as of Mon Nov 23 06:51:26 UTC 2026
+    System load:  0.0               Temperature:           -273.1 C
+    Usage of /:   29.6% of 6.71GB   Processes:             116
+    Memory usage: 24%               Users logged in:       0
+    Swap usage:   0%                IPv4 address for ens5: x.x.x.x
+  ...
+  Failed to connect to https://changelogs.ubuntu.com/meta-release-lts. Check your Internet connection or proxy settings
+
+  Last login: Mon Nov 23 06:47:34 2026 from 10.0.1.171
+
+Meaning: ProxyJump through project2-web (10.0.1.171) succeeded, and the Ubuntu
+         update check failed as expected since the private server has no internet.
+
+
+Test 3: Ping the private server from the web server
+---------------------------------------------------
+Command (web server):
+  ubuntu@ip-10-0-1-171:~$ ping -c 3 10.0.2.169
+
+Output:
+  PING 10.0.2.169 (10.0.2.169) 56(84) bytes of data.
+  64 bytes from 10.0.2.169: icmp_seq=1 ttl=64 time=0.209 ms
+  64 bytes from 10.0.2.169: icmp_seq=2 ttl=64 time=0.194 ms
+  64 bytes from 10.0.2.169: icmp_seq=3 ttl=64 time=0.193 ms
+
+  --- 10.0.2.169 ping statistics ---
+  3 packets transmitted, 3 received, 0% packet loss, time 2047ms
+  rtt min/avg/max/mdev = 0.193/0.198/0.209/0.007 ms
+
+Meaning: ICMP traffic is allowed from project2-web-sg to project2-private-sg.
+
+
+Test 4: Private server has no outbound internet access
+------------------------------------------------------
+Commands (private server):
+  curl -m 5 https://example.com
+  ping -c 2 8.8.8.8
+
+Output:
+  curl: (28) Connection timed out after 5001 milliseconds
+  PING 8.8.8.8 (8.8.8.8) 56(84) bytes of data.
+
+  --- 8.8.8.8 ping statistics ---
+  2 packets transmitted, 0 received, 100% packet loss, time 1015ms
+
+Meaning: the private route table has no route to the internet gateway.
+
+
+Test 5: CloudWatch CPU alarm
+----------------------------
+Command (web server):
+  stress-ng --cpu 2 --timeout 600s     (stopped after about 5 minutes)
+Alarm:  project2-web-high-cpu, CPUUtilization average >= 50% over 5 minutes
+Result: the alert email from SNS arrived at 12:36 IST.
