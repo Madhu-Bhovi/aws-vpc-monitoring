@@ -73,4 +73,7 @@ Test 5: CloudWatch CPU alarm
 Command (web server):
   stress-ng --cpu 2 --timeout 600s     (stopped after about 5 minutes)
 Alarm:  project2-web-high-cpu, CPUUtilization average >= 50% over 5 minutes
-Result: the alert email from SNS arrived at 12:36 IST.
+Result: the alert email from SNS arrived at 12:36 IST (07:06 UTC).
+Console: the alarm page showed the state In alarm. The graph (shown in UTC) had
+         CPUUtilization rising from near 0% to roughly 96% around 07:00 UTC,
+         crossing the 50% threshold line.
